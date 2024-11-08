@@ -1,53 +1,68 @@
 package com.tempest.employeeInfo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.tempest.employeeInfo.model.Employee;
 import com.tempest.employeeInfo.service.EmployeeService;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/employee")
 public class EmployeeApiService {
 
+    private static final Logger logger = Logger.getLogger(EmployeeApiService.class.getName());
+
     @Autowired
     private EmployeeService employeeService;
-    
+
     @GetMapping("/{employeeId}")
-    public Employee getEmployeeDetails(@PathVariable int employeeId) {
-        return employeeService.getEmployeeById(employeeId).orElse(null);
+    public ResponseEntity<Employee> getEmployeeDetails(@PathVariable int employeeId) {
+        Optional<Employee> employee = employeeService.getEmployeeById(employeeId);
+        if (employee.isPresent()) {
+            return new ResponseEntity<>(employee.get(), HttpStatus.OK);
+        } else {
+            logger.warning("Employee with ID " + employeeId + " not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping
-    public List<Employee> getAllEmployeeDetails() {
-        return employeeService.getAllEmployees();
+    public ResponseEntity<List<Employee>> getAllEmployeeDetails() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return new ResponseEntity<>(employees, HttpStatus.OK);
     }
-    
+
     @PostMapping
-    public String createEmployeeDetails(@RequestBody Employee employee) {
+    public ResponseEntity<String> createEmployeeDetails(@RequestBody Employee employee) {
+        if (employee == null) {
+            logger.warning("Invalid employee data.");
+            return new ResponseEntity<>("Invalid employee data", HttpStatus.BAD_REQUEST);
+        }
         employeeService.createEmployee(employee);
-        return "Employee created";
+        return new ResponseEntity<>("Employee created", HttpStatus.CREATED);
     }
-    
+
     @PutMapping
-    public String updateEmployeeDetails(@RequestBody Employee employee) {
+    public ResponseEntity<String> updateEmployeeDetails(@RequestBody Employee employee) {
+        if (employee == null) {
+            logger.warning("Invalid employee data.");
+            return new ResponseEntity<>("Invalid employee data", HttpStatus.BAD_REQUEST);
+        }
         try {
             employeeService.updateEmployee(employee);
-            return "Employee updated";
+            return new ResponseEntity<>("Employee updated", HttpStatus.OK);
         } catch (RuntimeException e) {
-            return e.getMessage();
+            logger.severe("Error updating employee: " + e.getMessage());
+            return new ResponseEntity<>("Error updating employee", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @DeleteMapping("/{employeeId}")
     public String deleteEmployeeDetails(@PathVariable int employeeId) {
         try {

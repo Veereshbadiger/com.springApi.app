@@ -5,62 +5,32 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "employee_info") 
+@Table(name = "employee_info")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Employee {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int employeeId;
-    
+
+    @NotBlank(message = "Employee name is mandatory")
+    @Size(max = 100, message = "Employee name should not exceed 100 characters")
     private String employeeName;
-    
+
+    @NotBlank(message = "Employee address is mandatory")
+    @Size(max = 255, message = "Employee address should not exceed 255 characters")
     private String employeeAddress;
-    
-    private long employeePhNumber;
 
-    // Default constructor
-    public Employee() {
-    }
-
-    // Parameterized constructor
-    public Employee(String employeeName, String employeeAddress, long employeePhNumber) {
-        this.employeeName = employeeName;
-        this.employeeAddress = employeeAddress;
-        this.employeePhNumber = employeePhNumber;
-    }
-
-    // Getter and Setter methods
-    public int getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(int employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public String getEmployeeName() {
-        return employeeName;
-    }
-
-    public void setEmployeeName(String employeeName) {
-        this.employeeName = employeeName;
-    }
-
-    public String getEmployeeAddress() {
-        return employeeAddress;
-    }
-
-    public void setEmployeeAddress(String employeeAddress) {
-        this.employeeAddress = employeeAddress;
-    }
-
-    public long getEmployeePhNumber() {
-        return employeePhNumber;
-    }
-
-    public void setEmployeePhNumber(long employeePhNumber) {
-        this.employeePhNumber = employeePhNumber;
-    }
+    @NotNull(message = "Employee phone number is mandatory")
+    private Long employeePhNumber;
 }
